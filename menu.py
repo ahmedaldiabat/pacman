@@ -7,7 +7,9 @@ class Menu():
         self.clicked = False 
         self.screen = screen 
         self.is_glowing = False 
-  
+
+
+
     def glow(self) -> None: 
         width = int(self.image.get_width() * 1.05) 
         height = int(self.image.get_height() * 1.05) 
@@ -79,20 +81,7 @@ class Menu():
         return buttons_dict 
  
     @staticmethod 
-    def draw_menu(screen: pygame.Surface, selected: int) -> None: 
-        #background 
-        background = pygame.image.load("materials/BackGround.png") 
-        background = pygame.transform.scale(background, (1600, 900)) 
- 
-        buttons_dict = Menu.buttons_init(screen) 
- 
-        buttons_list = [ 
-            buttons_dict["start"], 
-            buttons_dict["HighScore"], 
-            buttons_dict["instruction"], 
-            buttons_dict["exit"] 
-        ] 
- 
+    def draw_menu(screen: pygame.Surface, selected: int, background: pygame.Surface, buttons_list: list["Menu"]) -> None: 
         screen.blit(background, (0, 0)) 
         if buttons_list[0].draw(): 
             print("start") 
