@@ -6,9 +6,15 @@ class Menu():
         self.rect = image.get_rect(topleft=(x, y)) 
         self.clicked = False 
         self.screen = screen 
-        self.is_glowing = False 
-
-
+        self.is_glowing = False
+    pygame.mixer.init()
+    button_sound_on_select = pygame.mixer.Sound(
+        "materials/pacman_button_select.wav"
+    )
+    button_sound_on_select.set_volume(0.7)
+    button_sound_on_click = pygame.mixer.Sound(
+        "materials/pacman_button_click.wav"
+    )
 
     def glow(self) -> None: 
         width = int(self.image.get_width() * 1.05) 
@@ -38,7 +44,8 @@ class Menu():
         hover = self.rect.collidepoint(pos) 
  
         if hover: 
-            self.glow() 
+            self.glow()
+            Menu.button_sound_on_select.play() 
             self.is_glowing = False 
         elif not self.is_glowing:
             self.screen.blit(self.image, (self.rect.x, self.rect.y)) 
@@ -83,13 +90,17 @@ class Menu():
     @staticmethod 
     def draw_menu(screen: pygame.Surface, selected: int, background: pygame.Surface, buttons_list: list["Menu"]) -> None: 
         screen.blit(background, (0, 0)) 
-        if buttons_list[0].draw(): 
-            print("start") 
+        if buttons_list[0].draw():
+            Menu.button_sound_on_click.play() 
+            print("start")
         if buttons_list[3].draw(): 
+            Menu.button_sound_on_click.play()
             print("exit") 
         if buttons_list[1].draw(): 
-            print("HighScore") 
-        if buttons_list[2].draw(): 
+            Menu.button_sound_on_click.play()
+            print("HighScore")
+        if buttons_list[2].draw():
+            Menu.button_sound_on_click.play()
             print("Instructions") 
         buttons_list[selected].glow() 
         buttons_list[selected].is_glowing = False 
@@ -98,9 +109,29 @@ class Menu():
     def handle_event(event: pygame.event.Event, selected: int) -> int: 
         if event.type == pygame.KEYDOWN: 
             if event.key == pygame.K_DOWN: 
-                selected = (selected + 1) % 4 
+                selected = (selected + 1) % 4
+                Menu.button_sound_on_select.play() 
             elif event.key == pygame.K_UP: 
-                selected = (selected - 1) % 4 
-            elif event.key == pygame.K_RETURN: 
+                selected = (selected - 1) % 4
+                Menu.button_sound_on_select.play()
+            elif event.key == pygame.K_RETURN:
+                Menu.button_sound_on_click.play() 
                 print("Selected", selected) 
         return selected
+
+    @staticmethod
+    def menu_init(screen: pygame.Surface) -> tuple[pygame.Surface, list["Menu"]]:
+        pygame.mixer.music.load("materials/pacman_menu_calm.wav")
+        pygame.mixer.music.play(-1)
+        background = pygame.image.load("materials/BackGround.png") 
+        background = pygame.transform.scale(background, (1600, 900)) 
+        
+        buttons_dict = Menu.buttons_init(screen) 
+        
+        buttons_list = [ 
+            buttons_dict["start"], 
+            buttons_dict["HighScore"], 
+            buttons_dict["instruction"], 
+            buttons_dict["exit"] 
+        ]
+        return background, buttons_list

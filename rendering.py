@@ -7,23 +7,9 @@ screen: pygame.Surface = pygame.display.set_mode((1600, 900))
 selected = 0
 pygame.display.set_caption("PacMan")
 clock = pygame.time.Clock()
-
 run = True
-background = pygame.image.load("materials/BackGround.png") 
-background = pygame.transform.scale(background, (1600, 900)) 
- 
-buttons_dict = menu.Menu.buttons_init(screen) 
- 
-buttons_list = [ 
-    buttons_dict["start"], 
-    buttons_dict["HighScore"], 
-    buttons_dict["instruction"], 
-    buttons_dict["exit"] 
-]
 
-
-
-
+background, button_list = menu.Menu.menu_init(screen)
 while run:
 
     for event in pygame.event.get():
@@ -33,7 +19,7 @@ while run:
         selected = menu.Menu.handle_event(event, selected)
     
     
-    menu.Menu.draw_menu(screen, selected, background, buttons_list)
+    menu.Menu.draw_menu(screen, selected, background, button_list)
 
 
     pygame.display.flip()
