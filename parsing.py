@@ -270,7 +270,3 @@ class Config:
 
 config = Config()
 values = config.check_config()
-
-for i in values.keys():
-    print(f"{i}: {values[i]}")
-

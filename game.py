@@ -2,6 +2,8 @@ import pygame
 from mazegenerator import MazeGenerator
 from player import Player
 from collision import Collision
+
+
 class Game:
     def __init__(self, config, renderer):
         self.config = config
@@ -31,7 +33,7 @@ class Game:
             self.renderer.render_menu()
         self.renderer.quit()
 
-    def handle_events(self,events):
+    def handle_events(self, events):
         for event in events:
             if event.type == pygame.QUIT:
                 self.running = False
@@ -47,7 +49,6 @@ class Game:
                 elif event.key == pygame.K_ESCAPE:
                     self.running = False
             self.renderer.handle_menu_event(event)
-
 
     def update(self):
         if self.direction is not None and self.player is not None:

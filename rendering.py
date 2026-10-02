@@ -1,6 +1,7 @@
 import pygame
 import menu
 
+
 class Renderer:
     def __init__(self) -> None:
         pygame.init()
@@ -9,7 +10,7 @@ class Renderer:
         self.clock = pygame.time.Clock()
         self.selected = 0
         self.background, self.button_list = menu.Menu.menu_init(self.screen)
-    
+
     def get_events(self):
         return pygame.event.get()
 
