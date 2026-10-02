@@ -1,29 +1,33 @@
 import pygame
 import menu
 
-pygame.init()
-screen: pygame.Surface = pygame.display.set_mode((1600, 900))
-
-selected = 0
-pygame.display.set_caption("PacMan")
-clock = pygame.time.Clock()
-run = True
-
-background, button_list = menu.Menu.menu_init(screen)
-while run:
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-
-        selected = menu.Menu.handle_event(event, selected)
+class Renderer:
+    def __init__(self) -> None:
+        pygame.init()
+        self.screen: pygame.Surface = pygame.display.set_mode((1600, 900))
+        pygame.display.set_caption("PacMan")
+        self.clock = pygame.time.Clock()
+        self.selected = 0
+        self.background, self.button_list = menu.Menu.menu_init(self.screen)
     
-    
-    menu.Menu.draw_menu(screen, selected, background, button_list)
+    def get_events(self):
+        return pygame.event.get()
 
+    def handle_menu_event(self, event):
+        self.selected = menu.Menu.handle_event(
+            event,
+            self.selected
+            )
 
-    pygame.display.flip()
-    clock.tick(60)
+    def render_menu(self) -> None:
+        menu.Menu.draw_menu(
+            self.screen,
+            self.selected,
+            self.background,
+            self.button_list
+        )
+        pygame.display.flip()
+        self.clock.tick(60)
 
-
-pygame.quit()
+    def quit(self) -> None:
+        pygame.quit()
