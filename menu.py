@@ -106,7 +106,8 @@ class Menu():
             print("start")
         if buttons_list[3].draw():
             Menu.button_sound_on_click.play()
-            print("exit")
+            pygame.quit()
+            exit()
         if buttons_list[1].draw():
             Menu.button_sound_on_click.play()
             print("HighScore")
@@ -127,7 +128,9 @@ class Menu():
                 Menu.button_sound_on_select.play()
             elif event.key == pygame.K_RETURN:
                 Menu.button_sound_on_click.play()
-                print("Selected", selected)
+                if selected == 3:
+                    pygame.quit()
+                    exit()
         return selected
 
     @staticmethod
