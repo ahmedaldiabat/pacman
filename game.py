@@ -30,7 +30,6 @@ class Game:
             events = self.renderer.get_events()
             self.handle_events(events)
             self.update()
-            self.renderer.render_menu()
         self.renderer.quit()
 
     def handle_events(self, events):
@@ -48,7 +47,12 @@ class Game:
                     self.direction = (1, 0)
                 elif event.key == pygame.K_ESCAPE:
                     self.running = False
-            self.renderer.handle_menu_event(event)
+            if self.renderer.state == "Menu":
+                self.renderer.handle_menu_event(event)
+                self.renderer.render_menu()
+            elif self.renderer.state == "Instruction":
+                self.renderer.render_instruction()
+
 
     def update(self):
         if self.direction is not None and self.player is not None:
