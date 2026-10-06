@@ -1,4 +1,5 @@
 import pygame
+import sounds
 
 
 class Button:
@@ -10,21 +11,20 @@ class Button:
         self.screen = screen
         self.is_glowing = False
         self.played_sound = False
+        self.width = int(self.image.get_width() * 1.05)
+        self.height = int(self.image.get_height() * 1.05)
+        self.image = pygame.transform.smoothscale(self.image, (self.width, self.height))
+        self.draw_rect = image.get_rect(center=self.rect.center)
+        self.glow_rect = self.draw_rect.inflate(-16, -16)
 
     def glow(self) -> None:
-        width = int(self.image.get_width() * 1.05)
-        height = int(self.image.get_height() * 1.05)
-
-        image = pygame.transform.smoothscale(self.image, (width, height))
-        draw_rect = image.get_rect(center=self.rect.center)
-        glow_rect = draw_rect.inflate(-16, -16)
-
-        pygame.draw.rect(self.screen, (255, 220, 0), glow_rect,
+        pygame.draw.rect(self.screen, (255, 220, 0), self.glow_rect,
                          4, border_radius=20)
-        self.screen.blit(image, draw_rect)
+        self.screen.blit(self.image, self.draw_rect)
         self.is_glowing = True
 
-    def draw(self, select_sound: pygame.mixer.Sound) -> bool:
+    def draw(self) -> bool:
+        select_sound = sounds.button_sound_on_select
         action = False
         pos = pygame.mouse.get_pos()
         hover = self.rect.collidepoint(pos)

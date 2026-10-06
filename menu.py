@@ -1,7 +1,7 @@
 import pygame
 from button import Button
 import game
-
+import sounds
 
 class Menu:
     def __init__(self, screen: pygame.Surface, renderer) -> None:
@@ -12,11 +12,6 @@ class Menu:
         self.game = game
         self.renderer = renderer
         pygame.mixer.init()
-        self.button_sound_on_select = pygame.mixer.Sound(
-            "materials/pacman_button_select.wav")
-        self.button_sound_on_select.set_volume(0.7)
-        self.button_sound_on_click = pygame.mixer.Sound(
-            "materials/pacman_button_click.wav")
 
     def buttons_init(self) -> dict[str, Button]:
         buttons_dict = {}
@@ -66,25 +61,26 @@ class Menu:
             buttons_dict["instruction"],
             buttons_dict["exit"]
         ]
-        return self.background, self.buttons 
+        return self.background, self.buttons
 
     def draw_menu(self) -> None:
         self.screen.blit(self.background, (0, 0))
 
-        if self.buttons[0].draw(self.button_sound_on_select):
-            self.button_sound_on_click.play()
-            print("start")
+        if self.buttons[0].draw():
+            sounds.button_sound_on_click.play()
+            self.renderer.state = "gameplay"
+            self.renderer.load_gameplay()
 
-        if self.buttons[1].draw(self.button_sound_on_select):
-            self.button_sound_on_click.play()
+        if self.buttons[1].draw():
+            sounds.button_sound_on_click.play()
 
-        if self.buttons[2].draw(self.button_sound_on_select):
-            self.button_sound_on_click.play()
+        if self.buttons[2].draw():
+            sounds.button_sound_on_click.play()
             self.renderer.state = "Instruction"
             self.renderer.load_instruction()
 
-        if self.buttons[3].draw(self.button_sound_on_select):
-            self.button_sound_on_click.play()
+        if self.buttons[3].draw():
+            sounds.button_sound_on_click.play()
             pygame.quit()
             raise SystemExit
 
@@ -95,12 +91,20 @@ class Menu:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_DOWN:
                 self.selected = (self.selected + 1) % 4
-                self.button_sound_on_select.play()
+                sounds.button_sound_on_select.play()
             elif event.key == pygame.K_UP:
                 self.selected = (self.selected - 1) % 4
-                self.button_sound_on_select.play()
+                sounds.button_sound_on_select.play()
             elif event.key == pygame.K_RETURN:
-                self.button_sound_on_click.play()
+                sounds.button_sound_on_click.play()
+                if self.selected == 2:
+                    sounds.button_sound_on_click.play()
+                    self.renderer.state = "Instruction"
+                    self.renderer.load_instruction()
                 if self.selected == 3:
                     pygame.quit()
                     raise SystemExit
+                if self.selected == 0:
+                    sounds.button_sound_on_click.play()
+                    self.renderer.state = "gameplay"
+                    self.renderer.load_gameplay()

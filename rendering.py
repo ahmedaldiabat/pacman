@@ -1,5 +1,7 @@
 import pygame
 import menu
+import instruction
+import game_play
 
 
 class Renderer:
@@ -12,6 +14,8 @@ class Renderer:
         self.menu = menu.Menu(self.screen, self)
         self.background, self.button_list = self.menu.menu_init()
         self.state = "Menu"
+        self.instruction = instruction.Instruction(self.screen)
+        self.gameplay = game_play.Game(self.screen)
 
     def get_events(self):
         return pygame.event.get()
@@ -29,9 +33,20 @@ class Renderer:
         self.background = pygame.transform.scale(self.background, (1600, 900))
 
     def render_instruction(self):
-        self.screen.blit(self.background, (0, 0))
+        if self.instruction.draw_instruction(self.background) == "back":
+            self.state = "Menu"
         pygame.display.flip()
         self.clock.tick(60)
+
+    def load_gameplay(self):
+        self.background = pygame.image.load("materials/GamePlay_background.png")
+        self.background = pygame.transform.scale(self.background, (1600, 900))
+
+    def render_gameplay(self):
+        self.gameplay.draw_gameplay(self.background)
+        pygame.display.flip()
+        self.clock.tick(60)
+
 
     def quit(self) -> None:
         pygame.quit()

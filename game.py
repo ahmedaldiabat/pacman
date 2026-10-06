@@ -30,7 +30,15 @@ class Game:
             events = self.renderer.get_events()
             self.handle_events(events)
             self.update()
+            if self.renderer.state == "Menu":
+                self.renderer.render_menu()
+            elif self.renderer.state == "Instruction":
+                self.renderer.render_instruction()
+            if self.renderer.state == "gameplay":
+                self.renderer.render_gameplay()
+
         self.renderer.quit()
+
 
     def handle_events(self, events):
         for event in events:
@@ -49,10 +57,6 @@ class Game:
                     self.running = False
             if self.renderer.state == "Menu":
                 self.renderer.handle_menu_event(event)
-                self.renderer.render_menu()
-            elif self.renderer.state == "Instruction":
-                self.renderer.render_instruction()
-
 
     def update(self):
         if self.direction is not None and self.player is not None:
