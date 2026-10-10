@@ -26,27 +26,27 @@ class Renderer:
     def render_menu(self) -> None:
         self.menu.draw_menu()
         pygame.display.flip()
-        self.clock.tick(60)
 
     def load_instruction(self):
-        self.background = pygame.image.load("materials/instruction_background.png")
+        self.background = pygame.image.load(
+            "materials/instruction_background.png"
+        )
         self.background = pygame.transform.scale(self.background, (1600, 900))
 
     def render_instruction(self):
         if self.instruction.draw_instruction(self.background) == "back":
             self.state = "Menu"
         pygame.display.flip()
-        self.clock.tick(60)
 
     def load_gameplay(self):
-        self.background = pygame.image.load("materials/GamePlay_background.png")
+        self.background = pygame.image.load(
+            "materials/GamePlay_background.png"
+        )
         self.background = pygame.transform.scale(self.background, (1600, 900))
 
-    def render_gameplay(self, maze: list[list[int]]):
-        self.gameplay.draw_gameplay(self.background, maze)
+    def render_gameplay(self, maze: list[list[int]], player):
+        self.gameplay.draw_gameplay(self.background, maze, player)
         pygame.display.flip()
-        self.clock.tick(60)
-
 
     def quit(self) -> None:
         pygame.quit()
