@@ -1,5 +1,5 @@
 import pygame
-
+import pygame.transform
 
 class Game:
     def __init__(self, screen: pygame.Surface) -> None:
@@ -88,3 +88,18 @@ class Game:
             px = round(start_x + player.pixel_position.x)
             py = round(start_y + player.pixel_position.y)
             player.draw(self.screen, (px, py))
+
+    def get_blurred_background(self):
+        background = self.screen.copy()
+
+        # Downscale, then upscale to create a blur effect.
+        small = pygame.transform.smoothscale(
+            background,
+            (self.screen.get_width() // 12,
+            self.screen.get_height() // 12),
+        )
+
+        return pygame.transform.smoothscale(
+            small,
+            self.screen.get_size(),
+        )

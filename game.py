@@ -40,6 +40,8 @@ class Game:
                 self.renderer.render_instruction()
             elif self.renderer.state == "gameplay":
                 self.renderer.render_gameplay(self.maze, self.player)
+            elif self.renderer.state == "pause":
+                self.renderer.render_pause()
 
         self.renderer.quit()
 
@@ -59,8 +61,12 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+                if event.key == pygame.K_ESCAPE and self.renderer.state == "Menu":
                     self.running = False
+                elif event.key == pygame.K_ESCAPE and self.renderer.state == "Instruction":
+                    self.renderer.state = "Menu"
+                elif event.key == pygame.K_ESCAPE and self.renderer.state == "gameplay":
+                    self.renderer.state = "pause"
                 elif self.renderer.state == "gameplay" and event.key in directions:
                     self.direction = directions[event.key]
 

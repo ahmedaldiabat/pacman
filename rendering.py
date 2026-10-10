@@ -16,6 +16,13 @@ class Renderer:
         self.state = "Menu"
         self.instruction = instruction.Instruction(self.screen)
         self.gameplay = game_play.Game(self.screen)
+        self.pause_image = pygame.image.load(
+            "materials/paused.png"
+        ).convert_alpha()
+
+        self.pause_image = pygame.transform.smoothscale(
+            self.pause_image, (1100, 550)
+        )
 
     def get_events(self):
         return pygame.event.get()
@@ -37,6 +44,28 @@ class Renderer:
         if self.instruction.draw_instruction(self.background) == "back":
             self.state = "Menu"
         pygame.display.flip()
+
+    def render_pause(self):
+        blurred = pygame.transform.smoothscale(
+            pygame.transform.smoothscale(
+                self.pause_background,
+                (1600 // 12, 900 // 12),
+            ),
+            (1600, 900),
+        )
+
+        self.renderer.screen.blit(blurred, (0, 0))
+
+        overlay = pygame.Surface((1600, 900), pygame.SRCALPHA)
+        overlay.fill((0, 0, 20, 100))
+        self.renderer.screen.blit(overlay, (0, 0))
+
+        self.renderer.screen.blit(
+            self.pause_image,
+            self.pause_image.get_rect(
+                center=(800, 450)
+            ),
+        )
 
     def load_gameplay(self):
         self.background = pygame.image.load(
