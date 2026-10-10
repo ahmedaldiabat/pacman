@@ -35,10 +35,9 @@ class Game:
             elif self.renderer.state == "Instruction":
                 self.renderer.render_instruction()
             if self.renderer.state == "gameplay":
-                self.renderer.render_gameplay()
+                self.renderer.render_gameplay(self.maze)
 
         self.renderer.quit()
-
 
     def handle_events(self, events):
         for event in events:
@@ -57,7 +56,10 @@ class Game:
                     self.running = False
             if self.renderer.state == "Menu":
                 self.renderer.handle_menu_event(event)
-
+            elif self.renderer.state == "Instruction":
+                temp = self.renderer.instruction.handle_event(event)
+                if temp == "back":
+                    self.renderer.state = "Menu"
     def update(self):
         if self.direction is not None and self.player is not None:
             self.player.move(self.direction, self.collision)

@@ -42,8 +42,8 @@ class Renderer:
         self.background = pygame.image.load("materials/GamePlay_background.png")
         self.background = pygame.transform.scale(self.background, (1600, 900))
 
-    def render_gameplay(self):
-        self.gameplay.draw_gameplay(self.background)
+    def render_gameplay(self, maze: list[list[int]]):
+        self.gameplay.draw_gameplay(self.background, maze)
         pygame.display.flip()
         self.clock.tick(60)
 
