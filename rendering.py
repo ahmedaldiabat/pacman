@@ -16,6 +16,8 @@ class Renderer:
         self.state = "Menu"
         self.instruction = instruction.Instruction(self.screen)
         self.gameplay = game_play.Game(self.screen)
+        self.pause_background = None
+
         self.pause_image = pygame.image.load(
             "materials/paused.png"
         ).convert_alpha()
@@ -46,26 +48,40 @@ class Renderer:
         pygame.display.flip()
 
     def render_pause(self):
+        if self.pause_background is None:
+            return
+
+        screen_size = self.screen.get_size()
+
+        # Blur the captured gameplay screen.
+        small_size = (
+            max(1, screen_size[0] // 12),
+            max(1, screen_size[1] // 12),
+        )
+
+        small = pygame.transform.smoothscale(
+            self.pause_background, small_size
+        )
         blurred = pygame.transform.smoothscale(
-            pygame.transform.smoothscale(
-                self.pause_background,
-                (1600 // 12, 900 // 12),
-            ),
-            (1600, 900),
+            small, screen_size
         )
 
-        self.renderer.screen.blit(blurred, (0, 0))
+        self.screen.blit(blurred, (0, 0))
 
-        overlay = pygame.Surface((1600, 900), pygame.SRCALPHA)
-        overlay.fill((0, 0, 20, 100))
-        self.renderer.screen.blit(overlay, (0, 0))
-
-        self.renderer.screen.blit(
-            self.pause_image,
-            self.pause_image.get_rect(
-                center=(800, 450)
-            ),
+        # Dark overlay.
+        overlay = pygame.Surface(
+            screen_size, pygame.SRCALPHA
         )
+        overlay.fill((0, 0, 20, 110))
+        self.screen.blit(overlay, (0, 0))
+
+        # PAUSED graphic.
+        image_rect = self.pause_image.get_rect(
+            center=self.screen.get_rect().center
+        )
+        self.screen.blit(self.pause_image, image_rect)
+
+        pygame.display.flip()
 
     def load_gameplay(self):
         self.background = pygame.image.load(

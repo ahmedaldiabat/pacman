@@ -66,6 +66,7 @@ class Game:
                 elif event.key == pygame.K_ESCAPE and self.renderer.state == "Instruction":
                     self.renderer.state = "Menu"
                 elif event.key == pygame.K_ESCAPE and self.renderer.state == "gameplay":
+                    self.renderer.capture_pause_background()
                     self.renderer.state = "pause"
                 elif self.renderer.state == "gameplay" and event.key in directions:
                     self.direction = directions[event.key]
@@ -80,3 +81,6 @@ class Game:
     def update(self, dt: float):
         if self.renderer.state == "gameplay" and self.player is not None:
             self.player.update(self.direction, self.collision, dt)
+
+    def capture_pause_background(self):
+        self.pause_background = self.screen.copy()
