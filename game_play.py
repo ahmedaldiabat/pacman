@@ -7,7 +7,6 @@ class Game:
         self.cell_size = 43
         self.wall_width = 4
         self.wall_color = (65, 111, 168)
-        self.player_color = (255, 220, 0)
 
     def cellWalls(self, walls: int) -> list[int]:
         """Return walls in North, East, South, West order."""
@@ -54,35 +53,38 @@ class Game:
 
                 if walls[0]:  # North
                     pygame.draw.line(
-                        self.screen, self.wall_color,
-                        (x, y), (x + self.cell_size, y), self.wall_width,
+                        self.screen,
+                        self.wall_color,
+                        (x, y),
+                        (x + self.cell_size, y),
+                        self.wall_width,
                     )
                 if walls[1]:  # East
                     pygame.draw.line(
-                        self.screen, self.wall_color,
+                        self.screen,
+                        self.wall_color,
                         (x + self.cell_size, y),
                         (x + self.cell_size, y + self.cell_size),
                         self.wall_width,
                     )
                 if walls[2]:  # South
                     pygame.draw.line(
-                        self.screen, self.wall_color,
+                        self.screen,
+                        self.wall_color,
                         (x, y + self.cell_size),
                         (x + self.cell_size, y + self.cell_size),
                         self.wall_width,
                     )
                 if walls[3]:  # West
                     pygame.draw.line(
-                        self.screen, self.wall_color,
-                        (x, y), (x, y + self.cell_size), self.wall_width,
+                        self.screen,
+                        self.wall_color,
+                        (x, y),
+                        (x, y + self.cell_size),
+                        self.wall_width,
                     )
 
         if player is not None:
             px = round(start_x + player.pixel_position.x)
             py = round(start_y + player.pixel_position.y)
-            pygame.draw.circle(
-                self.screen,
-                self.player_color,
-                (px, py),
-                max(6, self.cell_size // 3),
-            )
+            player.draw(self.screen, (px, py))
