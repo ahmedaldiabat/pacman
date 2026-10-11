@@ -84,6 +84,7 @@ class Game:
 
     def capture_pause_background(self):
         self.pause_background = self.screen.copy()
+<<<<<<< HEAD
 
     def init_gums(self):
         height = self.maze_generator._height
@@ -103,3 +104,5 @@ class Game:
                     self.gums[y][x] = 2
                 else:
                     self.gums[y][x] = 1
+=======
+>>>>>>> origin/diabat

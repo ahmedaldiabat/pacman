@@ -16,9 +16,9 @@ class Instruction:
         if self.button.draw():
             sounds.button_sound_on_click.play()
             return "back"
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    sounds.button_sound_on_click.play()
-                    return "back"
         self.button.glow()
+
+    def handle_event(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RETURN:
+                return "back"
