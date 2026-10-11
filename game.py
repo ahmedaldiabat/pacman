@@ -24,7 +24,10 @@ class Game:
         self.score = 0
         self.running = True
         self.direction = None
-        self.gums = []
+        self.gums = [
+            [0 for _ in range(self.maze_generator._width)]
+            for _ in range(self.maze_generator._height)
+            ]
 
     def run(self):
         while self.running:
@@ -64,20 +67,20 @@ class Game:
             self.player.move(self.direction, self.collision)
 
     def init_gums(self):
-        #here we use the 0 to represent that there is no gum
-        #and we use the 1 to represent that there is a Pac-Gum
-        #and we use the 2 to represent that there is a Super-Gum
-        for i in self.maze_generator._width:
-            for j in self.maze_generator._height:
-                if self.maze[i][j] == 15:
-                    self.gums[i][j] = 0
-                elif i == 0 and j == 0:
-                    self.gums[i][j] = 2
-                elif i == 0 and self.maze_generator._height - 1:
-                    self.gums[i][j] = 2
-                elif i==self.maze_generator._width -1 and j == 0:
-                    self.gums[i][j] = 2
-                elif i==self.maze_generator._width -1 and j == self.maze_generator._height - 1:
-                    self.gums[i][j] = 2
+        height = self.maze_generator._height
+        width = self.maze_generator._width
+
+        self.gums = [[0] * width for _ in range(height)]
+
+        start_x, start_y = self.player.position
+
+        for y in range(height):
+            for x in range(width):
+                if self.maze[y][x] == 15:
+                    self.gums[y][x] = 0
+                elif (x, y) == (start_x, start_y):
+                    self.gums[y][x] = 0
+                elif y in (0, height - 1) and x in (0, width - 1):
+                    self.gums[y][x] = 2
                 else:
-                    self.gums[i][j] = 1
+                    self.gums[y][x] = 1
