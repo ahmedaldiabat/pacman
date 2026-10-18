@@ -89,8 +89,8 @@ class Renderer:
         )
         self.background = pygame.transform.scale(self.background, (1600, 900))
 
-    def render_gameplay(self, maze: list[list[int]], player):
-        self.gameplay.draw_gameplay(self.background, maze, player)
+    def render_gameplay(self, maze: list[list[int]], player, gums, ghost=None):
+        self.gameplay.draw_gameplay(self.background, maze, player, gums, ghost)
         pygame.display.flip()
 
     def quit(self) -> None:

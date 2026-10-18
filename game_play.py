@@ -22,6 +22,8 @@ class Game:
         background: pygame.Surface,
         maze: list[list[int]],
         player=None,
+        gums=None,
+        ghost=None
     ) -> None:
         self.screen.blit(background, (0, 0))
 
@@ -83,11 +85,36 @@ class Game:
                         (x, y + self.cell_size),
                         self.wall_width,
                     )
+                if gums is not None:
+                    gum = gums[row][col]
+                    center = (
+                        x + self.cell_size // 2,
+                        y + self.cell_size // 2,
+                    )
+
+                    if gum == 1:
+                        pygame.draw.circle(
+                            self.screen, (255, 220, 180), center, 4
+                        )
+                    elif gum == 2:
+                        pygame.draw.circle(
+                            self.screen, (255, 220, 0), center, 8
+                        )
 
         if player is not None:
             px = round(start_x + player.pixel_position.x)
             py = round(start_y + player.pixel_position.y)
             player.draw(self.screen, (px, py))
+        if ghost is not None:
+            gx = round(start_x + ghost.pixel_position.x)
+            gy = round(start_y + ghost.pixel_position.y)
+
+            pygame.draw.circle(
+                self.screen,
+                (255, 0, 0),
+                (gx, gy),
+                self.cell_size // 2 - 4,
+            )
 
     def get_blurred_background(self):
         background = self.screen.copy()

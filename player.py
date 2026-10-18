@@ -23,7 +23,7 @@ class Player:
         )
         self.target_position = None
         self.target_cell = None
-        self.current_direction = (1, 0)
+        self.current_direction = (0, 1)
 
     def update(self, direction, collision, dt: float) -> None:
         """
@@ -32,6 +32,8 @@ class Player:
         A requested direction is treated as a turn request. If the turn is
         blocked, keep moving in the current direction instead.
         """
+        next_x, next_y = self.target_cell or self.position
+        arrived_cell = None
         if self.target_position is None:
             chosen_direction = None
 
@@ -48,7 +50,7 @@ class Player:
                 chosen_direction = self.current_direction
 
             if chosen_direction is None:
-                return
+                return None
 
             next_x = self.position[0] + chosen_direction[0]
             next_y = self.position[1] + chosen_direction[1]
@@ -67,10 +69,15 @@ class Player:
         if distance <= step:
             self.pixel_position = self.target_position.copy()
             self.position = self.target_cell
+            arrived_cell = self.position
+
             self.target_position = None
             self.target_cell = None
+
         elif distance > 0 and step > 0:
             self.pixel_position += offset * (step / distance)
+
+        return arrived_cell
 
     @staticmethod
     def _can_move(collision, position, direction) -> bool:
