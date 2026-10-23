@@ -1,272 +1,125 @@
+"""Configuration loading with safe defaults and JSON comment support."""
+from __future__ import annotations
+
 import json
+import re
 from typing import Any
 
 
 class Config:
-    def __init__(self) -> None:
-        self.DEFAULT_CONFIG: dict[str, Any] = {
-            "highscore_filename": "highscores.json",
-            "lives": 3,
-            "pacgum": 42,
-            "points_per_pacgum": 10,
-            "points_per_super_pacgum": 50,
-            "points_per_ghost": 200,
-            "seed": 42,
-            "level_max_time": 90,
-            "levels": [
-                {"width": 15, "height": 15},
-                {"width": 15, "height": 15},
-                {"width": 15, "height": 15},
-                {"width": 15, "height": 15},
-                {"width": 15, "height": 15},
-                {"width": 15, "height": 15},
-                {"width": 15, "height": 15},
-                {"width": 15, "height": 15},
-                {"width": 15, "height": 15},
-                {"width": 15, "height": 15}
-            ]
-        }
+    """Read and validate the game configuration."""
 
-    def load_config(self, filename: str) -> dict[str, Any]:
-        with open(filename, "r") as file:
-            lines = []
-            for line in file:
-                stripped = line.strip()
-                if stripped.startswith("#"):
-                    continue
-                lines.append(line)
-            content = "".join(lines)
-        return json.loads(content)
+    DEFAULT_CONFIG: dict[str, Any] = {
+        "highscore_filename": "highscores.json",
+        "lives": 3,
+        "pacgum": 42,
+        "points_per_pacgum": 10,
+        "points_per_super_pacgum": 50,
+        "points_per_ghost": 200,
+        "seed": 42,
+        "level_max_time": 90,
+        "levels": [{"width": 15, "height": 15} for _ in range(10)],
+    }
 
-    def check_height_width(
-        self,
-        width: int,
-        height: int
-    ) -> tuple[str, bool]:
-        if width < 2:
+    def __init__(self, filename: str = "config.json") -> None:
+        self.filename = filename
+
+    @staticmethod
+    def _remove_comments(content: str) -> str:
+        """Remove # and // comments without removing markers inside strings."""
+        result: list[str] = []
+        in_string = False
+        escaped = False
+        i = 0
+        while i < len(content):
+            char = content[i]
+            if in_string:
+                result.append(char)
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == '"':
+                    in_string = False
+                i += 1
+                continue
+            if char == '"':
+                in_string = True
+                result.append(char)
+                i += 1
+            elif char == "#":
+                while i < len(content) and content[i] != "\n":
+                    i += 1
+            elif content.startswith("//", i):
+                while i < len(content) and content[i] != "\n":
+                    i += 1
+            else:
+                result.append(char)
+                i += 1
+        return "".join(result)
+
+    def load_config(self, filename: str | None = None) -> dict[str, Any]:
+        """Load a JSON object after stripping supported comments."""
+        path = filename or self.filename
+        with open(path, "r", encoding="utf-8") as file:
+            parsed = json.loads(self._remove_comments(file.read()))
+        if not isinstance(parsed, dict):
+            raise ValueError("configuration root must be an object")
+        return parsed
+
+    @staticmethod
+    def _positive_int(value: Any, minimum: int = 1) -> bool:
+        return isinstance(value, int) and not isinstance(value, bool) and value >= minimum
+
+    def check_height_width(self, width: int, height: int) -> tuple[str, bool]:
+        """Check that dimensions are usable by the maze generator."""
+        if width < 7:
             return "width", False
-        if height < 2:
+        if height < 7:
             return "height", False
-        if width == 2 and height == 2:
-            return "width and height", False
         return "", True
 
-    def check_config(self) -> dict[str, Any]:
-        values_dict: dict[str, Any] = {}
-        correct_values_dict: dict[str, Any] = {}
+    def check_config(self, filename: str | None = None) -> dict[str, Any]:
+        """Validate values individually, falling back to safe defaults."""
+        defaults = self.DEFAULT_CONFIG
         try:
-            values_dict = self.load_config("config.json")
-        except Exception:
-            print("Error in loading file")
-            return self.DEFAULT_CONFIG.copy()
-        default_keys = list(self.DEFAULT_CONFIG.keys())
-        for key in values_dict:
-            normalized_key = key.strip().lower()
-            if normalized_key in default_keys:
-                if normalized_key == "highscore_filename":
-                    if isinstance(values_dict[key], str):
-                        filename = values_dict[key].strip().lower()
-                        if filename.endswith(".json"):
-                            correct_values_dict[normalized_key] = filename
-                        else:
-                            correct_values_dict[normalized_key] = (
-                                self.DEFAULT_CONFIG[normalized_key]
-                            )
-                            print(
-                                f"value for {key} is invalid, "
-                                "using the default value"
-                            )
-                    else:
-                        correct_values_dict[normalized_key] = (
-                            self.DEFAULT_CONFIG[normalized_key]
-                        )
-                        print(
-                            f"value for {key} is invalid, "
-                            "using the default value"
-                        )
-                elif normalized_key in ["lives", "level_max_time"]:
-                    try:
-                        if (
-                            isinstance(values_dict[key], int)
-                            and not isinstance(values_dict[key], bool)
-                            and values_dict[key] > 0
-                        ):
-                            correct_values_dict[normalized_key] = values_dict[key]
-                        else:
-                            correct_values_dict[normalized_key] = (
-                                self.DEFAULT_CONFIG[normalized_key]
-                            )
-                            print(
-                                f"value for {key} is invalid, "
-                                "using the default value"
-                            )
-                    except Exception:
-                        correct_values_dict[normalized_key] = (
-                            self.DEFAULT_CONFIG[normalized_key]
-                        )
-                        print(
-                            f"value for {key} is invalid, "
-                            "using the default value"
-                        )
-                elif normalized_key in [
-                    "pacgum",
-                    "points_per_pacgum",
-                    "points_per_super_pacgum",
-                    "points_per_ghost",
-                    "seed"
-                ]:
-                    try:
-                        if (
-                            isinstance(values_dict[key], int)
-                            and not isinstance(values_dict[key], bool)
-                            and values_dict[key] >= 0
-                        ):
-                            correct_values_dict[normalized_key] = values_dict[key]
-                        else:
-                            correct_values_dict[normalized_key] = (
-                                self.DEFAULT_CONFIG[normalized_key]
-                            )
-                            print(
-                                f"value for {key} is invalid, "
-                                "using the default value"
-                            )
-                    except Exception:
-                        correct_values_dict[normalized_key] = (
-                            self.DEFAULT_CONFIG[normalized_key]
-                        )
-                        print(
-                            f"value for {key} is invalid, "
-                            "using the default value"
-                        )
-                elif normalized_key == "levels":
-                    try:
-                        level_counter = 0
-                        levels_list: list[dict[str, int]] = []
-                        if not isinstance(values_dict[key], list):
-                            print(
-                                "levels is invalid, "
-                                "using the default levels"
-                            )
-                            correct_values_dict[normalized_key] = (
-                                self.DEFAULT_CONFIG[normalized_key]
-                            )
-                            continue
-                        for level in values_dict[key]:
-                            level_counter += 1
-                            if not isinstance(level, dict):
-                                print(
-                                    f"invalid level {level_counter}, "
-                                    "using default values"
-                                )
-                                levels_list.append(
-                                    {"width": 15, "height": 15}
-                                )
-                                continue
-                            level_value_list = [15, 15]
-                            for k in level:
-                                normalized_level_key = k.strip().lower()
-                                if normalized_level_key == "width":
-                                    try:
-                                        if (
-                                            isinstance(level[k], int)
-                                            and not isinstance(
-                                                level[k], bool
-                                            )
-                                        ):
-                                            level_value_list[0] = level[k]
-                                        else:
-                                            raise ValueError()
-                                    except Exception:
-                                        level_value_list[0] = 15
-                                        print(
-                                            f"using default value of the "
-                                            f"width in level {level_counter}"
-                                        )
-                                elif normalized_level_key == "height":
-                                    try:
-                                        if (
-                                            isinstance(level[k], int)
-                                            and not isinstance(
-                                                level[k], bool
-                                            )
-                                        ):
-                                            level_value_list[1] = level[k]
-                                        else:
-                                            raise ValueError()
-                                    except Exception:
-                                        level_value_list[1] = 15
-                                        print(
-                                            f"using default value of the "
-                                            f"height in level {level_counter}"
-                                        )
-                                else:
-                                    print(
-                                        f"unknown key {k} in level "
-                                        f"{level_counter}, ignoring"
-                                    )
-                            message, valid = self.check_height_width(
-                                level_value_list[0],
-                                level_value_list[1]
-                            )
-                            if valid:
-                                levels_list.append(
-                                    {
-                                        "width": level_value_list[0],
-                                        "height": level_value_list[1]
-                                    }
-                                )
-                            elif message == "width":
-                                levels_list.append(
-                                    {
-                                        "width": 15,
-                                        "height": level_value_list[1]
-                                    }
-                                )
-                                print(
-                                    f"using default value of the "
-                                    f"{message} in level {level_counter}"
-                                )
-                            elif message == "height":
-                                levels_list.append(
-                                    {
-                                        "width": level_value_list[0],
-                                        "height": 15
-                                    }
-                                )
-                                print(
-                                    f"using default value of the "
-                                    f"{message} in level {level_counter}"
-                                )
-                            else:
-                                levels_list.append(
-                                    {"width": 15, "height": 15}
-                                )
-                                print(
-                                    f"using default values of width "
-                                    f"and height in level "
-                                    f"{level_counter}"
-                                )
-                        while len(levels_list) < 10:
-                            levels_list.append(
-                                {"width": 15, "height": 15}
-                            )
-                        correct_values_dict[normalized_key] = levels_list
-                    except Exception as error:
-                        print(error)
-                        correct_values_dict[normalized_key] = (
-                            self.DEFAULT_CONFIG[normalized_key]
-                        )
+            raw = self.load_config(filename)
+        except (OSError, ValueError, json.JSONDecodeError) as error:
+            print(f"Warning: cannot read configuration ({error}); using defaults.")
+            return {**defaults, "levels": [dict(x) for x in defaults["levels"]]}
+
+        config: dict[str, Any] = {}
+        for key, default in defaults.items():
+            value = raw.get(key, default)
+            if key == "highscore_filename":
+                valid = isinstance(value, str) and value.strip().endswith(".json")
+                config[key] = value.strip() if valid else default
+            elif key == "levels":
+                levels: list[dict[str, int]] = []
+                if isinstance(value, list):
+                    for item in value[:50]:
+                        width = item.get("width", 15) if isinstance(item, dict) else 15
+                        height = item.get("height", 15) if isinstance(item, dict) else 15
+                        if not self._positive_int(width, 7):
+                            width = 15
+                        if not self._positive_int(height, 7):
+                            height = 15
+                        # Keep the maze comfortably inside the existing 1600x900 view.
+                        width = min(width, 29)
+                        height = min(height, 17)
+                        levels.append({"width": width, "height": height})
+                if not levels:
+                    levels = [dict(x) for x in defaults["levels"]]
+                while len(levels) < 10:
+                    levels.append(dict(levels[-1]))
+                config[key] = levels
+            elif key in ("lives", "level_max_time"):
+                config[key] = value if self._positive_int(value) else default
             else:
-                print(f"unknown key {key}, ignoring")
-        for key in default_keys:
-            if key not in correct_values_dict:
-                correct_values_dict[key] = self.DEFAULT_CONFIG[key]
-                print(
-                    f"missing key {key}, "
-                    "using the default value"
-                )
-        return correct_values_dict
-
-
-config = Config()
-values = config.check_config()
+                config[key] = value if self._positive_int(value, 0) else default
+            if key in raw and config[key] == default and raw[key] != default:
+                print(f"Warning: invalid config value for '{key}'; using default.")
+        for key in raw:
+            if key.strip().lower() not in defaults:
+                print(f"Warning: unknown config key '{key}' ignored.")
+        return config

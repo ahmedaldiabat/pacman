@@ -1,110 +1,100 @@
+"""Main menu preserving the project's image-based button style."""
+from __future__ import annotations
+
 import pygame
 from button import Button
-import game
 import sounds
 
+
 class Menu:
+    """Display and route the four main menu actions."""
+
     def __init__(self, screen: pygame.Surface, renderer) -> None:
         self.screen = screen
         self.selected = 0
         self.background = None
         self.buttons: list[Button] = []
-        self.game = game
         self.renderer = renderer
-        pygame.mixer.init()
 
     def buttons_init(self) -> dict[str, Button]:
-        buttons_dict = {}
-
-        start_button = pygame.image.load(
-            "materials/start_button.png").convert()
-        start_button.set_colorkey((0, 0, 0))
-        start_button = pygame.transform.scale(start_button, (500, 200))
-
-        high_scores_button = pygame.image.load(
-            "materials/HighScores_button.png").convert()
-        high_scores_button.set_colorkey((0, 0, 0))
-        high_scores_button = pygame.transform.scale(
-            high_scores_button, (500, 200))
-
-        instruction_button = pygame.image.load(
-            "materials/instructions_button.png")
-        instruction_button.set_colorkey((0, 0, 0))
-        instruction_button = pygame.transform.scale(
-            instruction_button, (500, 200))
-
-        exit_button = pygame.image.load(
-            "materials/exit_button.png").convert()
-        exit_button.set_colorkey((0, 0, 0))
-        exit_button = pygame.transform.scale(exit_button, (500, 200))
-
-        buttons_dict["start"] = Button(start_button, 30, 50, self.screen)
-        buttons_dict["exit"] = Button(exit_button, 30, 650, self.screen)
-        buttons_dict["HighScore"] = Button(
-            high_scores_button, 30, 250, self.screen)
-        buttons_dict["instruction"] = Button(
-            instruction_button, 30, 450, self.screen)
-
-        return buttons_dict
+        """Load the original button artwork and place it consistently."""
+        specs = [
+            ("start", "materials/start_button.png", 30, 50),
+            ("HighScore", "materials/HighScores_button.png", 30, 250),
+            ("instruction", "materials/instructions_button.png", 30, 450),
+            ("exit", "materials/exit_button.png", 30, 650),
+        ]
+        result = {}
+        for name, path, x, y in specs:
+            try:
+                image = pygame.image.load(path).convert_alpha()
+                image = pygame.transform.smoothscale(image, (500, 150))
+            except (pygame.error, OSError) as error:
+                print(f"Warning: cannot load menu button {path}: {error}")
+                image = pygame.Surface((500, 150), pygame.SRCALPHA)
+                font = pygame.font.Font(None, 48)
+                label = font.render(name.upper(), True, (255, 220, 0))
+                image.blit(label, label.get_rect(center=(250, 75)))
+            result[name] = Button(image, x, y, self.screen)
+        return result
 
     def menu_init(self):
-        pygame.mixer.music.load("materials/pacman_menu_calm.wav")
-        pygame.mixer.music.play(-1)
-
-        self.background = pygame.image.load("materials/BackGround.png")
-        self.background = pygame.transform.scale(self.background, (1600, 900))
-
-        buttons_dict = self.buttons_init()
-        self.buttons = [
-            buttons_dict["start"],
-            buttons_dict["HighScore"],
-            buttons_dict["instruction"],
-            buttons_dict["exit"]
-        ]
+        """Initialize background music and original menu assets."""
+        try:
+            if pygame.mixer.get_init():
+                pygame.mixer.music.load("materials/pacman_menu_calm.wav")
+                pygame.mixer.music.set_volume(0.25)
+                pygame.mixer.music.play(-1)
+        except (pygame.error, OSError):
+            pass
+        try:
+            self.background = pygame.image.load(
+                "materials/BackGround.png").convert()
+            self.background = pygame.transform.smoothscale(
+                self.background, self.screen.get_size())
+        except (pygame.error, OSError):
+            self.background = pygame.Surface(self.screen.get_size())
+            self.background.fill((8, 10, 28))
+        buttons = self.buttons_init()
+        self.buttons = [buttons["start"], buttons["HighScore"],
+                        buttons["instruction"], buttons["exit"]]
         return self.background, self.buttons
+
+    def _activate(self, index: int) -> None:
+        """Run the action associated with a menu index."""
+        sounds.play(sounds.button_sound_on_click)
+        if index == 0:
+            self.renderer.game_controller.start_game()
+        elif index == 1:
+            self.renderer.state = "Highscores"
+        elif index == 2:
+            self.renderer.state = "Instruction"
+            self.renderer.load_instruction()
+        elif index == 3:
+            self.renderer.game_controller.running = False
 
     def draw_menu(self) -> None:
         self.screen.blit(self.background, (0, 0))
+        mouse_position = pygame.mouse.get_pos()
+        for index, button in enumerate(self.buttons):
+            if button.draw():
+                self.selected = index
+                self._activate(index)
+            if button.rect.collidepoint(mouse_position):
+                self.selected = index
+        if self.buttons:
+            self.buttons[self.selected].glow()
+            self.buttons[self.selected].is_glowing = False
 
-        if self.buttons[0].draw():
-            sounds.button_sound_on_click.play()
-            self.renderer.state = "gameplay"
-            self.renderer.load_gameplay()
-
-        if self.buttons[1].draw():
-            sounds.button_sound_on_click.play()
-
-        if self.buttons[2].draw():
-            sounds.button_sound_on_click.play()
-            self.renderer.state = "Instruction"
-            self.renderer.load_instruction()
-
-        if self.buttons[3].draw():
-            sounds.button_sound_on_click.play()
-            pygame.quit()
-            raise SystemExit
-
-        self.buttons[self.selected].glow()
-        self.buttons[self.selected].is_glowing = False
-
-    def handle_event(self, event: pygame.event.Event) -> None:
+    def handle_event(self, event: pygame.event.Event) -> int:
+        """Support keyboard navigation and mouse clicks."""
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_DOWN:
-                self.selected = (self.selected + 1) % 4
-                sounds.button_sound_on_select.play()
+                self.selected = (self.selected + 1) % len(self.buttons)
+                sounds.play(sounds.button_sound_on_select)
             elif event.key == pygame.K_UP:
-                self.selected = (self.selected - 1) % 4
-                sounds.button_sound_on_select.play()
-            elif event.key == pygame.K_RETURN:
-                sounds.button_sound_on_click.play()
-                if self.selected == 2:
-                    sounds.button_sound_on_click.play()
-                    self.renderer.state = "Instruction"
-                    self.renderer.load_instruction()
-                if self.selected == 3:
-                    pygame.quit()
-                    raise SystemExit
-                if self.selected == 0:
-                    sounds.button_sound_on_click.play()
-                    self.renderer.state = "gameplay"
-                    self.renderer.load_gameplay()
+                self.selected = (self.selected - 1) % len(self.buttons)
+                sounds.play(sounds.button_sound_on_select)
+            elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                self._activate(self.selected)
+        return self.selected

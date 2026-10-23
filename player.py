@@ -110,11 +110,15 @@ class Player:
         sprite.set_colorkey((0, 0, 0))
 
         yellow = (255, 220, 0)
+        pygame.draw.circle(sprite, (255, 190, 20), (cx, cy), radius + 2)
         pygame.draw.circle(sprite, yellow, (cx, cy), radius)
 
         direction = self.current_direction or (1, 0)
         angle = math.atan2(direction[1], direction[0])
-        mouth_angle = math.radians(28)
+        # Animate the mouth with a smooth arcade-style chomp.
+        phase = (pygame.time.get_ticks() % 240) / 240.0
+        chomp = abs(phase * 2.0 - 1.0)
+        mouth_angle = math.radians(8 + 34 * chomp)
 
         mouth_points = [
             (cx, cy),

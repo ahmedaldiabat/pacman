@@ -1,33 +1,24 @@
 {
-    "highscore_filename": "hgihscore.json     ",
-
+    # Persistent score file
+    "highscore_filename": "highscores.json",
+    # Ten levels minimum; dimensions can be customized
     "levels": [
-        {
-            "width": 15,
-            "height": 15
-        },
-        {
-            "width": 15,
-            "height": 15
-        },
-        {
-            "width": 15,
-            "height": 15
-        }
+        {"width": 15, "height": 15},
+        {"width": 15, "height": 15},
+        {"width": 15, "height": 15},
+        {"width": 15, "height": 15},
+        {"width": 15, "height": 15},
+        {"width": 15, "height": 15},
+        {"width": 15, "height": 15},
+        {"width": 15, "height": 15},
+        {"width": 15, "height": 15},
+        {"width": 15, "height": 15}
     ],
-
     "lives": 3,
-
     "pacgum": 42,
-    
-    "points_per_pacgum" : 10,
-
-    "points_per_super_pacgum" : 50,
-
-    "points_per_ghost" : 200,
-
+    "points_per_pacgum": 10,
+    "points_per_super_pacgum": 50,
+    "points_per_ghost": 200,
     "seed": 42,
-
-    "level_max_time" : 90
-
+    "level_max_time": 90
 }
