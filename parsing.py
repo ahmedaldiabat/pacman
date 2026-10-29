@@ -7,7 +7,14 @@ from typing import Any
 
 
 class Config:
-    """Read and validate the game configuration."""
+    """Read and validate the game configuration.
+
+    The maze is drawn inside a fixed 1600x900 gameplay frame. These limits
+    match the maximum grid that fits that frame at the normal cell size.
+    Requests larger than the frame are clamped rather than overflowing it.
+    """
+    MAX_MAZE_WIDTH = 29
+    MAX_MAZE_HEIGHT = 17
 
     DEFAULT_CONFIG: dict[str, Any] = {
         "highscore_filename": "highscores.json",
@@ -104,14 +111,14 @@ class Config:
                             width = 15
                         if not self._positive_int(height, 7):
                             height = 15
-                        # Keep the maze comfortably inside the existing 1600x900 view.
-                        width = min(width, 29)
-                        height = min(height, 17)
+                        # Never let config dimensions exceed the visible maze frame.
+                        # Clamp each axis independently: e.g. 100x100 becomes 29x17.
+                        width = min(width, self.MAX_MAZE_WIDTH)
+                        height = min(height, self.MAX_MAZE_HEIGHT)
                         levels.append({"width": width, "height": height})
                 if not levels:
                     levels = [dict(x) for x in defaults["levels"]]
-                while len(levels) < 10:
-                    levels.append(dict(levels[-1]))
+                # A non-empty configured list defines the campaign length.
                 config[key] = levels
             elif key in ("lives", "level_max_time"):
                 config[key] = value if self._positive_int(value) else default

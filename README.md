@@ -15,7 +15,8 @@ A Python/Pygame recreation of the classic Pac-Man arcade game. The project keeps
 - Four independently colored ghosts, chase/flee behavior, frightened-ghost scoring, and respawn delays.
 - Ten levels, level timer, score/lives persistence between levels, pause/resume, and win/game-over screens.
 - Persistent top-ten highscores with validated player names.
-- Review cheat mode: press `C` during gameplay to toggle it; while enabled, `I` toggles invincibility, `F` freezes ghosts, `V` toggles speed boost, `L` skips a level, and `H` adds a life.
+- Configurable campaign length: the number of entries in `config.json` → `levels` determines how many levels are played; the default config has ten.
+- Cheat mode: press `C` during gameplay to toggle it; while enabled, `1` toggles invincibility and `2` skips to the next level. Existing `I`, `F`, `V`, `L`, and `H` shortcuts remain available.
 - Graceful fallbacks for missing audio/image assets and malformed configuration values.
 
 ## Instructions
@@ -41,7 +42,7 @@ Alternatively, run `python3 main.py config.json`.
 - **Move:** Arrow keys or `W`, `A`, `S`, `D`
 - **Pause / resume:** `P` or `Escape`; press `M` on the pause screen to return to the main menu
 - **Menu navigation:** Up/down arrows, Enter/Space, or mouse
-- **Cheat mode:** `C`, then `I`, `F`, `V`, `L`, or `H`
+- **Cheat mode:** press `C`, then `1` for invincibility or `2` to skip a level. `I`, `F`, `V`, `L`, and `H` remain available as additional shortcuts.
 - **Save final score:** type a name (letters, digits, spaces; max 10 characters) and press Enter
 
 ## Configuration
@@ -51,7 +52,7 @@ The configuration is JSON with support for full-line `#` comments and `//` comme
 | Key | Default | Description |
 |---|---:|---|
 | `highscore_filename` | `highscores.json` | JSON file used to store the top ten |
-| `levels` | Ten 15×15 levels | List of `{ "width": 15, "height": 15 }` objects; the game guarantees at least ten levels |
+| `levels` | Ten 15×15 levels | Each object defines a level maze width and height. The number of entries is the campaign length; an empty or missing list falls back to the ten-level default. |
 | `lives` | `3` | Starting lives |
 | `pacgum` | `42` | Retained project configuration value |
 | `points_per_pacgum` | `10` | Score for a small pellet |
@@ -105,7 +106,7 @@ AI assistance was used to audit the existing project against the activity specif
 ## Recent integration fixes
 
 - The gameplay renderer scales the maze to fit the 1600×900 viewport, and the simulation uses the same cell size as the renderer.
-- The campaign length follows the configured `levels` array (the supplied configuration contains ten levels; configuration validation keeps at least ten levels).
+- The campaign length follows the configured `levels` array exactly; the default `config.json` supplies ten levels.
 - The instruction screen uses its artwork without extra overlaid instructional text. Its original back-button artwork works by mouse; Enter, Backspace, and Escape also return to the menu.
 - The highscore screen uses the original menu background with a dark translucent panel, and its back button works by mouse. Enter, Backspace, and Escape return to the menu.
 - Added synthesized, local WAV effects for normal pellets, power pellets, frightened ghosts being eaten, and the player being hit. Audio failures remain non-fatal.
@@ -115,4 +116,4 @@ AI assistance was used to audit the existing project against the activity specif
 
 - Move: arrow keys or W/A/S/D.
 - Pause/resume: P or Escape; press M from pause to return to the menu.
-- Cheats: press C to enable cheat mode, then I (invincibility), F (freeze ghosts), V (speed boost), L (skip level), or H (extra life).
+- Cheats: press C to enable cheat mode, then 1 (invincibility) or 2 (skip level). Existing I/F/V/L/H cheat shortcuts also remain available.

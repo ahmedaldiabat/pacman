@@ -38,7 +38,7 @@ class Renderer:
         self.font = pygame.font.Font(None, 58)
         self.medium_font = pygame.font.Font(None, 38)
         self.small_font = pygame.font.Font(None, 30)
-        self.highscore_back_button = self._make_back_button((685, 790))
+        self.highscore_back_button = self._make_back_button((645, 778))
 
     def _load_image(self, path: str, alpha: bool = False) -> pygame.Surface:
         """Load a local asset and scale it to the display; report missing files."""
@@ -66,9 +66,9 @@ class Renderer:
         from button import Button
         try:
             image = pygame.image.load("materials/back_button.png").convert_alpha()
-            image = pygame.transform.smoothscale(image, (230, 78))
+            image = pygame.transform.smoothscale(image, (310, 102))
         except (pygame.error, OSError):
-            image = pygame.Surface((230, 78), pygame.SRCALPHA)
+            image = pygame.Surface((310, 102), pygame.SRCALPHA)
             pygame.draw.rect(image, (35, 115, 160), image.get_rect(), border_radius=18)
             label = self.medium_font.render("BACK", True, (255, 255, 255))
             image.blit(label, label.get_rect(center=image.get_rect().center))

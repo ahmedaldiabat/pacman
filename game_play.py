@@ -23,13 +23,25 @@ class Game:
     def maze_origin(self, maze):
         rows = len(maze)
         cols = len(maze[0]) if rows else 0
-        size = min(43, (self.screen.get_width() - 100) // max(1, cols),
-                   (self.screen.get_height() - 150) // max(1, rows))
-        # Keep the maze inside the playable viewport even for custom dimensions.
-        self.cell_size = max(8, size)
+        # Keep a comfortable margin inside the decorative maze frame. The
+        # maze is intentionally smaller than the frame instead of stretching
+        # almost edge-to-edge. Oversized levels still shrink further as needed.
+        viewport_left = 220
+        viewport_right = self.screen.get_width() - 220
+        viewport_top = 150
+        viewport_bottom = self.screen.get_height() - 115
+        available_width = max(1, viewport_right - viewport_left)
+        available_height = max(1, viewport_bottom - viewport_top)
+        # 34 px is the visual maximum for a cell; very large levels use a
+        # smaller cell size to stay fully inside the frame.
+        size = min(34, available_width // max(1, cols),
+                   available_height // max(1, rows))
+        self.cell_size = max(1, size)
         size = self.cell_size
-        return ((self.screen.get_width() - cols * size) // 2,
-                95 + (self.screen.get_height() - 130 - rows * size) // 2,
+        maze_width = cols * size
+        maze_height = rows * size
+        return (viewport_left + (available_width - maze_width) // 2,
+                viewport_top + (available_height - maze_height) // 2,
                 size)
 
     def draw_gameplay(self, background, maze, player=None, gums=None,
@@ -85,13 +97,35 @@ class Game:
             if item.active:
                 item.draw(self.screen, (round(start_x + item.pixel_position.x),
                                         round(start_y + item.pixel_position.y)))
-        hud = (f"SCORE  {score:06d}     LIVES  {lives}     "
-               f"LEVEL  {level}/{total_levels}     TIME  {max(0, int(remaining))}")
-        text = self.font.render(hud, True, (255, 255, 255))
-        self.screen.blit(text, (35, 24))
+        # Individual translucent cards keep the HUD legible against the
+        # bright background and give each stat a clear visual boundary.
+        stats = [
+            (f"SCORE  {score:06d}", 35, 224),
+            (f"LIVES  {lives}", 270, 165),
+            (f"LEVEL  {level}/{total_levels}", 445, 205),
+            (f"TIME  {max(0, int(remaining))}", 660, 175),
+        ]
+        for label, x, width in stats:
+            rect = pygame.Rect(x, 20, width, 42)
+            panel = pygame.Surface(rect.size, pygame.SRCALPHA)
+            pygame.draw.rect(panel, (3, 8, 30, 220), panel.get_rect(),
+                             border_radius=11)
+            pygame.draw.rect(panel, (20, 135, 255, 230), panel.get_rect(),
+                             width=2, border_radius=11)
+            self.screen.blit(panel, rect)
+            text = self.font.render(label, True, (255, 255, 255))
+            self.screen.blit(text, text.get_rect(center=rect.center))
         if cheat:
-            label = self.small_font.render("CHEAT MODE", True, (255, 210, 40))
-            self.screen.blit(label, (self.screen.get_width() - 155, 58))
+            label = self.small_font.render("CHEAT MODE", True, (255, 220, 40))
+            rect = label.get_rect(topright=(self.screen.get_width() - 28, 27))
+            panel_rect = rect.inflate(24, 18)
+            panel = pygame.Surface(panel_rect.size, pygame.SRCALPHA)
+            pygame.draw.rect(panel, (32, 18, 3, 225), panel.get_rect(),
+                             border_radius=10)
+            pygame.draw.rect(panel, (255, 180, 20, 240), panel.get_rect(),
+                             width=2, border_radius=10)
+            self.screen.blit(panel, panel_rect)
+            self.screen.blit(label, rect)
 
     def get_blurred_background(self):
         """Return a downscaled/upscaled copy for the pause overlay."""

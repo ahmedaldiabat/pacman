@@ -250,13 +250,15 @@ class Game:
                         if not self.cheat_mode:
                             self.invincible = self.ghosts_frozen = self.speed_boost = False
                     elif self.cheat_mode:
-                        if event.key == pygame.K_i:
+                        # Number keys are the simple, documented cheat controls.
+                        # Keep the letter shortcuts for existing users.
+                        if event.key in (pygame.K_1, pygame.K_i):
                             self.invincible = not self.invincible
                         elif event.key == pygame.K_f:
                             self.ghosts_frozen = not self.ghosts_frozen
                         elif event.key == pygame.K_v:
                             self.speed_boost = not self.speed_boost
-                        elif event.key == pygame.K_l:
+                        elif event.key in (pygame.K_2, pygame.K_l):
                             self._next_level()
                         elif event.key == pygame.K_h:
                             self.lives += 1

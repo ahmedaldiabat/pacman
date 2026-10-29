@@ -13,15 +13,15 @@ class Instruction:
         self.screen = screen
         try:
             image = pygame.image.load("materials/back_button.png").convert_alpha()
-            image = pygame.transform.smoothscale(image, (230, 78))
+            image = pygame.transform.smoothscale(image, (310, 102))
         except (pygame.error, OSError):
-            image = pygame.Surface((230, 78), pygame.SRCALPHA)
+            image = pygame.Surface((310, 102), pygame.SRCALPHA)
             pygame.draw.rect(image, (35, 115, 160), image.get_rect(), border_radius=18)
             font = pygame.font.Font(None, 40)
             label = font.render("BACK", True, (255, 255, 255))
             image.blit(label, label.get_rect(center=image.get_rect().center))
-        self.button = Button(image, 685, 790, screen)
-        self.button.rect.topleft = (685, 790)
+        self.button = Button(image, 645, 778, screen)
+        self.button.rect.topleft = (645, 778)
         self.button.draw_rect = self.button.image.get_rect(center=self.button.rect.center)
         self.button.glow_rect = self.button.draw_rect.inflate(-8, -8)
 
